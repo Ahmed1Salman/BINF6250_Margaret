@@ -1,44 +1,54 @@
 #!/usr/bin/env python
 from pprint import pprint
-from symbol import continue_stmt
+from unittest import skip
 
 
 # Modify this function signature and fill in the details
-def parse_line(line: str):
-    # splits line by tabs, takes last item (all the info starting with ALLELEID)
-    new_line = line.rstrip().split('\t')[-1]
-    # split new_line by ;, list
-    gene_info = new_line.split(';')
+def parse_line(line:str):
 
-    # TODO: how to find AF_EXAC (not is same place in each list)
-    if "AF_EXAC" in gene_info:
-        pos = gene_info.index('AF_EXAC')
-        AFC_EXAC = gene_info[pos]
-        print(AFC_EXAC)
-    # TODO: find CLNDN
-    #CLNDN = gene_info.find('CLNDN')
-    #if CLNDN != -1:
+    if 'AF_EXAC' in line:
+        info_line = line.split('\t')[7].split(';')
+        af_exac = float(extract_data_from_info(info_line, 'AF_EXAC'))
+        clndn = extract_data_from_info(info_line, 'CLNDN')
+        clndn = clndn.split('|')
+    else:
+        af_exac = 1
+    if af_exac < 0.0001:
+        rare_disease = clndn
+    else:
+        rare_disease = []
 
-    # initialize empty list to add rare genes to
-    #rare_genes = []
-    #if AF_EXAC < 0.0001:
-     #   if CLNDN == "not_specified" or CLNDN == "not_provided":
-      #      continue
-      #  else:
-      #      rare_genes.append(CLNDN)
+    return rare_disease
 
-    print(gene_info)
+
+
 
 
 # Modify this function signature and fill in the details
-def read_file(file: str):
-    with open(file) as f:
+def read_file(file_name:str):
+    with open(file_name,"r") as f:
+        disease_dict = {}
         for line in f:
-            if (line.startswith("#")): continue  # filters out metadata lines
-            #print(line)
-            # pass to parse_line to extract needed data
-            parse_line(line)
+            if line.startswith('#'):
+                continue
+            else:
+                disease_list = parse_line(line)
+                for disease in disease_list:
+                    if disease in disease_dict.keys():
+                        disease_dict[disease] += 1
+                    else:
+                        disease_dict[disease] = 1
+        disease_dict.pop('not_provided')
+        disease_dict.pop('not_specified')
+        return disease_dict
 
+def extract_data_from_info(info:list, metadata:str):
+    #Extract the relevant data from the info line given a Metadata requirement such as
+    #AF_EXAC or CLNDN.
+
+    values = [data for data in info if metadata in data]
+    clean_data = values[0].split('=')[1]
+    return clean_data
 
 
 if __name__ == "__main__":
