@@ -6,7 +6,6 @@ from unittest import skip
 # Modify this function signature and fill in the details
 def parse_line(line:str):
 
-
     if 'AF_EXAC' in line:
         info_line = line.split('\t')[7].split(';')
         af_exac = float(extract_data_from_info(info_line, 'AF_EXAC'))
@@ -32,7 +31,14 @@ def read_file(file_name:str):
                 continue
             else:
                 disease_list = parse_line(line)
-    pass
+                for disease in disease_list:
+                    if disease in disease_dict.keys():
+                        disease_dict[disease] += 1
+                    else:
+                        disease_dict[disease] = 1
+        disease_dict.pop('not_provided')
+        disease_dict.pop('not_specified')
+        return disease_dict
 
 def extract_data_from_info(info:list, metadata:str):
     #Extract the relevant data from the info line given a Metadata requirement such as
