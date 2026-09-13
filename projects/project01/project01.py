@@ -22,6 +22,8 @@ def parse_line(line:str):
 
 
 
+
+
 # Modify this function signature and fill in the details
 def read_file(file_name:str):
     with open(file_name,"r") as f:
